@@ -1,4 +1,4 @@
-# GitHub Avatar Downloader
+# GitHub Recommended Repos
 
 ## Description
 
