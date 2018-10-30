@@ -1,0 +1,27 @@
+{
+  "name": "recommended-repos",
+  "version": "1.0.0",
+  "description": "Given a target repo, this app recommends 5 repos (based on the most starred repos by the contributors to the target repo).",
+  "main": "recommend.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fiveache/GitHub-Avatar-Downloader.git"
+  },
+  "keywords": [
+    "GitHub",
+    "Repos",
+    "Recommend"
+  ],
+  "author": "David Lacho",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fiveache/recommended-repos"
+  },
+  "homepage": "https://github.com/fiveache/recommended-repos#readme",
+  "devDependencies": {},
+  "dependencies": {
+    "dotenv": "^6.1.0",
+    "request": "^2.88.0"
+  }
+}
