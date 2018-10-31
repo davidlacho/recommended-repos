@@ -9,6 +9,17 @@ const gitHubKey = process.env.GITHUB_KEY;
 const owner = process.argv[2];
 const repo = process.argv[3];
 
+const logItOut = item => new Promise((resolve, reject) => {
+  try {
+    console.log(item);
+    resolve(item);
+  } catch (e) {
+    if (e) {
+      reject(e);
+    }
+  }
+});
+
 const recommendRepos = (repoOwner, repoName) => new Promise((resolve) => {
   resolve({
     url: `https://api.github.com/repos/${repoOwner}/${repoName}/contributors`,
@@ -27,51 +38,50 @@ const makeCall = options => new Promise((resolve, reject) => request(options, (e
   }
 }));
 
-const parseJSON = body => new Promise((resolve, reject) => {
-  let parsedData;
-  try {
-    parsedData = JSON.parse(body);
-  } catch (e) {
-    reject(e);
-  }
-  resolve(parsedData);
+const parseJSON = body => JSON.parse(body);
+
+const mapUsers = parseddata => parseddata.map(user => user.login);
+
+const structureStarObject = item => ({
+  name: [item[0].name],
+  stars: item[0].stargazers_count,
+  repoOwner: item[0].owner.login,
 });
 
-const mapUsers = parseddata => new Promise((resolve, reject) => {
-  try {
-    resolve(parseddata.map(user => user.login));
-  } catch (e) {
-    if (e) {
-      reject(e);
-    }
-  }
-});
+const getUserOptionArray = (userArray) => {
+  const userOptionsArr = userArray.map((user) => {
+    return {
+      url: `https://api.github.com/users/${user}/starred`,
+      headers: {
+        'User-Agent': 'node application',
+        Authorization: `token ${gitHubKey}`,
+      },
+    };
+  });
+  return userOptionsArr;
+};
 
-// const getStarred = userArray => new Promise((resolve) => {
-//   userArray.forEach((user, i) => {
-//     const options = {
-//       url: `https://api.github.com/repos/${repoOwner}/${repoName}/contributors`,
-//       headers: {
-//         'User-Agent': 'node application',
-//         Authorization: `token ${gitHubKey}`,
-//       },
-//     };
-//     makeCall(options)
-//     .then()
-//   });
-//
-//
-// });
+const getPromiseArray = optionsArr => optionsArr.map(options => makeCall(options).then(parseJSON).then(structureStarObject));
 
-const logItOut = item => new Promise((resolve, reject) => {
-  try {
-    console.log(item);
-  } catch (e) {
-    if (e) {
-      reject(e);
-    }
-  }
-});
+const createRepoArray = promiseArr => Promise.all(promiseArr);
+
+const sortRepos = repoArr => repoArr.sort((a, b) => b.stars - a.stars);
+
+const getTopStars = sortedRepo => sortedRepo.slice(0, 5);
+
+const outputToUser = (topStars) => {
+  topStars.forEach((top) => {
+    const {
+      name,
+      stars,
+      repoOwner,
+    } = top;
+    console.log(`[ ${stars} stars ] ${repoOwner} / ${name}`);
+  });
+};
+/**
+ * ========IMPLEMENTATION ========
+ */
 
 try {
   if (owner && repo && (process.argv.length === 4)) {
@@ -80,8 +90,12 @@ try {
       .then(makeCall)
       .then(parseJSON)
       .then(mapUsers)
-      .then(logItOut)
-      // .then(getStarred)
+      .then(getUserOptionArray)
+      .then(getPromiseArray)
+      .then(createRepoArray)
+      .then(sortRepos)
+      .then(getTopStars)
+      .then(outputToUser)
       .catch((e) => {
         console.error(e);
       });
