@@ -9,16 +9,6 @@ const gitHubKey = process.env.GITHUB_KEY;
 const owner = process.argv[2];
 const repo = process.argv[3];
 
-const logItOut = item => new Promise((resolve, reject) => {
-  try {
-    console.log(item);
-    resolve(item);
-  } catch (e) {
-    if (e) {
-      reject(e);
-    }
-  }
-});
 
 const recommendRepos = (repoOwner, repoName) => new Promise((resolve) => {
   resolve({
